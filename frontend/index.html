@@ -1,0 +1,310 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Clientes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e5799, #207cca, #2989d8, #1e5799);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 20px auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: white;
+        }
+        
+        .create-btn {
+            background: #27ae60;
+        }
+        
+        .search-btn {
+            background: #3498db;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .client-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+        
+        .client-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #3498db;
+        }
+        
+        .client-info h3 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .client-info p {
+            color: #7f8c8d;
+        }
+        
+        .client-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .details-btn {
+            background: #3498db;
+        }
+        
+        .edit-btn {
+            background: #f39c12;
+        }
+        
+        .delete-btn {
+            background: #e74c3c;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            background: #27ae60;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateX(200%);
+            transition: transform 0.4s;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background: #e74c3c;
+        }
+        
+        footer {
+            color: white;
+            text-align: center;
+            margin-top: auto;
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .client-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .client-actions {
+                width: 100%;
+                margin-top: 15px;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-users"></i> Lista de Clientes</h1>
+            <p>Administra los clientes de tu sistema</p>
+        </header>
+        
+        <div class="card">
+            <div class="button-group">
+                <button class="create-btn" onclick="location.href='create.html'">
+                    <i class="fas fa-plus"></i> Crear Cliente
+                </button>
+                <button class="search-btn" onclick="location.href='search.html'">
+                    <i class="fas fa-search"></i> Buscar por ID
+                </button>
+            </div>
+            
+            <ul class="client-list" id="clientes-list">
+                <!-- Los clientes se cargarán aquí -->
+            </ul>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        ¡Cliente eliminado exitosamente!
+    </div>
+    
+    <footer>
+        <p>Sistema de Gestión de Clientes &copy; 2023 | Todos los derechos reservados</p>
+    </footer>
+    
+    <script>
+        // Función para formatear el teléfono
+        function formatPhone(phone) {
+            return phone.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+        }
+        
+        // Cargar clientes al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            //fetch('http://localhost:5002/read_clients')
+            fetch('http://107.20.158.190:5002/read_clients')
+                .then(response => response.json())
+                .then(data => {
+                    const list = document.getElementById('clientes-list');
+                    
+                    if (data.length === 0) {
+                        list.innerHTML = '<p>No hay clientes registrados.</p>';
+                        return;
+                    }
+                    
+                    data.forEach(cliente => {
+                        const item = document.createElement('li');
+                        item.className = 'client-item';
+                        
+                        item.innerHTML = `
+                            <div class="client-info">
+                                <h3>${cliente.nombres} ${cliente.apellidos}</h3>
+                                <p><strong>CI:</strong> ${cliente.ci} | <strong>Teléfono:</strong> ${formatPhone(cliente.telefono)}</p>
+                                <p><strong>Correo:</strong> ${cliente.correo}</p>
+                            </div>
+                            <div class="client-actions">
+                                <button class="action-btn details-btn" onclick="location.href='detail.html?id=${cliente.id}'">
+                                    <i class="fas fa-info-circle"></i> Detalles
+                                </button>
+                                <button class="action-btn edit-btn" onclick="location.href='edit.html?id=${cliente.id}'">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="action-btn delete-btn" onclick="eliminar(${cliente.id}, '${cliente.nombres}')">
+                                    <i class="fas fa-trash-alt"></i> Eliminar
+                                </button>
+                            </div>
+                        `;
+                        
+                        list.appendChild(item);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error cargando clientes:', error);
+                    const list = document.getElementById('clientes-list');
+                    list.innerHTML = '<p>Error al cargar los clientes. Intente nuevamente.</p>';
+                });
+        });
+        
+        function eliminar(id, nombre) {
+            if (!confirm(`¿Estás seguro de eliminar al cliente ${nombre}?`)) {
+                return;
+            }
+            
+            //fetch(`http://localhost:5004/delete_client/${id}`, {
+            fetch(`http://107.20.158.190:5004/delete_client/${id}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { 
+                        throw new Error(err.mensaje || 'Error del servidor'); 
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                showNotification(`Cliente ${nombre} eliminado exitosamente`);
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification(`Error al eliminar: ${error.message}`, true);
+            });
+        }
+        
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.remove('error');
+            
+            if (isError) {
+                notification.classList.add('error');
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

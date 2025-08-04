@@ -1,0 +1,31 @@
+version: '3.9'
+services:
+  create:
+    image: petterouskid/crud-create:latest
+    container_name: crud_create
+    ports:
+      - "5001:5001"
+
+  read:
+    image: petterouskid/crud-read:latest
+    container_name: crud_read
+    ports:
+      - "5002:5002"
+
+  update:
+    image: petterouskid/crud-update:latest
+    container_name: crud_update
+    ports:
+      - "5003:5003"
+
+  delete:
+    image: petterouskid/crud-delete:latest
+    container_name: crud_delete
+    ports:
+      - "5004:5004"
+
+  search:
+    image: petterouskid/crud-search:latest
+    container_name: crud_search
+    ports:
+      - "5005:5005"

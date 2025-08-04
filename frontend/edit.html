@@ -1,0 +1,318 @@
+<!-- edit.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Cliente</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e5799, #207cca, #2989d8, #1e5799);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .required::after {
+            content: " *";
+            color: #e74c3c;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .submit-btn {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .submit-btn:hover {
+            background: #219653;
+            transform: translateY(-2px);
+        }
+        
+        .back-btn {
+            background: #3498db;
+            color: white;
+        }
+        
+        .back-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            background: #27ae60;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateX(200%);
+            transition: transform 0.4s;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background: #e74c3c;
+        }
+        
+        @media (max-width: 600px) {
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-user-edit"></i> Editar Cliente</h1>
+        </header>
+        
+        <div class="card">
+            <form id="clientForm">
+                <div class="form-group">
+                    <label for="ci" class="required">Cédula de Identidad</label>
+                    <input type="text" id="ci" name="ci" placeholder="Ingrese la cédula" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nombres" class="required">Nombres</label>
+                    <input type="text" id="nombres" name="nombres" placeholder="Ingrese los nombres" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="apellidos" class="required">Apellidos</label>
+                    <input type="text" id="apellidos" name="apellidos" placeholder="Ingrese los apellidos" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="telefono" class="required">Teléfono</label>
+                    <input type="tel" id="telefono" name="telefono" placeholder="Ingrese el teléfono" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="correo" class="required">Correo Electrónico</label>
+                    <input type="email" id="correo" name="correo" placeholder="Ingrese el correo electrónico" required>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-save"></i> Actualizar Cliente
+                    </button>
+                    <button type="button" class="back-btn" onclick="location.href='index.html'">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        ¡Cliente actualizado exitosamente!
+    </div>
+    
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        
+        // Cargar datos del cliente
+        //fetch(`http://localhost:5005/search_client/${id}`)
+        fetch(`http://107.20.158.190:5005/search_client/${id}`)
+            .then(response => response.json())
+            .then(cliente => {
+                document.getElementById('ci').value = cliente.ci;
+                document.getElementById('nombres').value = cliente.nombres;
+                document.getElementById('apellidos').value = cliente.apellidos;
+                document.getElementById('telefono').value = cliente.telefono;
+                document.getElementById('correo').value = cliente.correo;
+            });
+        
+        // Manejar envío del formulario
+        document.getElementById('clientForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validar formulario
+            if (!validateForm()) return;
+            
+            // Obtener datos del formulario
+            const formData = {
+                ci: document.getElementById('ci').value,
+                nombres: document.getElementById('nombres').value,
+                apellidos: document.getElementById('apellidos').value,
+                telefono: document.getElementById('telefono').value,
+                correo: document.getElementById('correo').value
+            };
+            
+            // Enviar datos al backend
+            updateClient(formData);
+        });
+        
+        function validateForm() {
+            let isValid = true;
+            const inputs = document.querySelectorAll('#clientForm input[required]');
+            
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    isValid = false;
+                    input.style.borderColor = '#e74c3c';
+                } else {
+                    input.style.borderColor = '#ddd';
+                }
+            });
+            
+            // Validar email
+            const emailInput = document.getElementById('correo');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailInput.value && !emailRegex.test(emailInput.value)) {
+                isValid = false;
+                emailInput.style.borderColor = '#e74c3c';
+                showNotification('Por favor ingrese un correo válido', true);
+            }
+            
+            return isValid;
+        }
+        
+        function updateClient(clientData) {
+            const submitBtn = document.querySelector('.submit-btn');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando...';
+            submitBtn.disabled = true;
+            
+            //fetch(`http://localhost:5003/update_client/${id}`, {
+            fetch(`http://107.20.158.190:5003/update_client/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(clientData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { 
+                        throw new Error(err.error || 'Error del servidor'); 
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                showNotification('¡Cliente actualizado exitosamente!');
+                setTimeout(() => {
+                    location.href = 'index.html';
+                }, 2000);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification(`Error al actualizar: ${error.message}`, true);
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+            });
+        }
+        
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.remove('error');
+            
+            if (isError) {
+                notification.classList.add('error');
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

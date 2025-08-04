@@ -1,0 +1,262 @@
+<!-- search.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscar Cliente</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e5799, #207cca, #2989d8, #1e5799);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        #id {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        #id:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .search-btn {
+            padding: 14px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #3498db;
+            color: white;
+        }
+        
+        .search-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .client-details {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            border-left: 4px solid #3498db;
+            display: none;
+        }
+        
+        .client-details h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .detail-info {
+            display: grid;
+            grid-template-columns: max-content 1fr;
+            gap: 15px;
+        }
+        
+        .detail-info strong {
+            color: #7f8c8d;
+        }
+        
+        .button-group {
+            margin-top: 25px;
+        }
+        
+        .back-btn {
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #3498db;
+            color: white;
+            width: 100%;
+        }
+        
+        .back-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            background: #e74c3c;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateX(200%);
+            transition: transform 0.4s;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        footer {
+            color: white;
+            text-align: center;
+            margin-top: auto;
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-search"></i> Buscar Cliente</h1>
+            <p>Ingrese el ID del cliente que desea buscar</p>
+        </header>
+        
+        <div class="card">
+            <div class="search-container">
+                <input type="number" id="id" placeholder="ID del cliente">
+                <button class="search-btn" onclick="buscar()">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </div>
+            
+            <div class="client-details" id="resultado">
+                <h3><i class="fas fa-user"></i> Información del Cliente</h3>
+                <div class="detail-info" id="clientInfo">
+                    <!-- La información del cliente se mostrará aquí -->
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="back-btn" onclick="location.href='index.html'">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        Cliente no encontrado
+    </div>
+    
+    <footer>
+        <p>Sistema de Gestión de Clientes &copy; 2023 | Todos los derechos reservados</p>
+    </footer>
+    
+    <script>
+        function buscar() {
+            const id = document.getElementById('id').value;
+            if (!id) {
+                showNotification('Por favor ingrese un ID');
+                return;
+            }
+            
+            //fetch(`http://localhost:5005/search_client/${id}`)
+            fetch(`http://107.20.158.190:5005/search_client/${id}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Cliente no encontrado');
+                    }
+                    return response.json();
+                })
+                .then(cliente => {
+                    const clientInfo = document.getElementById('clientInfo');
+                    clientInfo.innerHTML = `
+                        <strong>CI:</strong>
+                        <span>${cliente.ci}</span>
+                        <strong>Nombres:</strong>
+                        <span>${cliente.nombres}</span>
+                        <strong>Apellidos:</strong>
+                        <span>${cliente.apellidos}</span>
+                        <strong>Teléfono:</strong>
+                        <span>${cliente.telefono}</span>
+                        <strong>Correo:</strong>
+                        <span>${cliente.correo}</span>
+                    `;
+                    
+                    document.querySelector('.client-details').style.display = 'block';
+                })
+                .catch(error => {
+                    showNotification(error.message);
+                    document.querySelector('.client-details').style.display = 'none';
+                });
+        }
+        
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

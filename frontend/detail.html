@@ -1,0 +1,210 @@
+<!-- detail.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles del Cliente</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e5799, #207cca, #2989d8, #1e5799);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .client-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .detail-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .detail-item h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .detail-info {
+            display: grid;
+            grid-template-columns: max-content 1fr;
+            gap: 15px;
+        }
+        
+        .detail-info strong {
+            color: #7f8c8d;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: white;
+        }
+        
+        .back-btn {
+            background: #3498db;
+        }
+        
+        .edit-btn {
+            background: #f39c12;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        footer {
+            color: white;
+            text-align: center;
+            margin-top: auto;
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 600px) {
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-user-circle"></i> Detalles del Cliente</h1>
+        </header>
+        
+        <div class="card">
+            <div class="client-details" id="detalles">
+                <!-- Los detalles se cargarán aquí -->
+            </div>
+            
+            <div class="button-group">
+                <button class="back-btn" onclick="location.href='index.html'">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+                <button class="edit-btn" id="editButton">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Sistema de Gestión de Clientes &copy; 2023 | Todos los derechos reservados</p>
+    </footer>
+    
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        
+        document.getElementById('editButton').addEventListener('click', () => {
+            location.href = `edit.html?id=${id}`;
+        });
+        
+        //fetch(`http://localhost:5005/search_client/${id}`)
+        fetch(`http://107.20.158.190:5005/search_client/${id}`)
+        
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Cliente no encontrado');
+                }
+                return response.json();
+            })
+            .then(cliente => {
+                const container = document.getElementById('detalles');
+                
+                container.innerHTML = `
+                    <div class="detail-item">
+                        <h3><i class="fas fa-id-card"></i> Información Personal</h3>
+                        <div class="detail-info">
+                            <strong>CI:</strong>
+                            <span>${cliente.ci}</span>
+                            <strong>Nombres:</strong>
+                            <span>${cliente.nombres}</span>
+                            <strong>Apellidos:</strong>
+                            <span>${cliente.apellidos}</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <h3><i class="fas fa-address-book"></i> Información de Contacto</h3>
+                        <div class="detail-info">
+                            <strong>Teléfono:</strong>
+                            <span>${cliente.telefono}</span>
+                            <strong>Correo:</strong>
+                            <span>${cliente.correo}</span>
+                        </div>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                const container = document.getElementById('detalles');
+                container.innerHTML = `<p>${error.message}</p>`;
+            });
+    </script>
+</body>
+</html>
