@@ -3,7 +3,7 @@ import os
 from flask import Flask, jsonify
 from flask_cors import CORS  # ✅ Importar CORS
 
-# prueba 1 CI/CD
+# prueba 2 CI/CD
 # Configuración de rutas
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
