@@ -60,7 +60,7 @@ jobs:
           git pull
 
           echo "📥 Haciendo pull de imágenes desde Docker Hub..."
-          docker compose pull
+          docker-compose pull
 
           echo "🚀 Reiniciando contenedores..."
-          docker compose up -d
+          docker-compose up -d
