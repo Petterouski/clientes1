@@ -1,0 +1,66 @@
+name: Deploy microservicios CRUD a EC2
+
+on:
+  push:
+    paths:
+      - 'create/**'
+      - 'read/**'
+      - 'update/**'
+      - 'delete/**'
+      - 'search/**'
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Detectar carpetas modificadas
+      id: servicios
+      run: |
+        echo "🧐 Buscando carpetas cambiadas con Dockerfile..."
+        CARPETAS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '/' | cut -d '/' -f1 | sort -u)
+        echo "Carpetas encontradas:"
+        echo "$CARPETAS"
+        echo "carpetas_modificadas<<EOF" >> $GITHUB_OUTPUT
+        echo "$CARPETAS" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push Docker images modificadas
+      run: |
+        for CARPETA in ${{ steps.servicios.outputs.carpetas_modificadas }}; do
+          if [ -f "$CARPETA/Dockerfile" ]; then
+            echo "🔧 Build y Push para $CARPETA"
+            docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/crud-$CARPETA:latest $CARPETA
+            docker push ${{ secrets.DOCKERHUB_USERNAME }}/crud-$CARPETA:latest
+          else
+            echo "⚠️ Saltando $CARPETA (no hay Dockerfile)"
+          fi
+        done
+
+    - name: Deploy en EC2 vía SSH
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          echo "🔄 Haciendo git pull en EC2..."
+          cd /home/ec2-user/crud-clientes10
+          git pull
+
+          echo "📥 Haciendo pull de imágenes desde Docker Hub..."
+          docker compose pull
+
+          echo "🚀 Reiniciando contenedores..."
+          docker compose up -d
